@@ -28,8 +28,8 @@ import task_entry
 
 class MainPage(webapp2.RequestHandler):
     def get(self):
-        raw_cursor = self.request.get('cursor')
-        cursor = Cursor(urlsafe=raw_cursor) if raw_cursor else None
+        urlsafe_cursor = self.request.get('cursor') or None
+        cursor = urlsafe_cursor and Cursor(urlsafe=urlsafe_cursor)
 
         start = time.time()
         open_tasks = (
@@ -44,11 +44,12 @@ class MainPage(webapp2.RequestHandler):
         _, cursor_prev, has_more_prev = (
             task_entry.TaskEntryModel.fetch_history_page(
                 'exploration', 'foo', 'resolved', cursor, new_to_old=False))
+        resolved_tasks = list(resolved_tasks)
         end = time.time()
         resolved_fetch_duration = end - start
 
-        path = os.path.join(os.path.dirname(__file__), 'index.html')
-        self.response.out.write(template.render(path, {
+        template_path = os.path.join(os.path.dirname(__file__), 'index.html')
+        self.response.out.write(template.render(template_path, {
             'open_tasks': open_tasks,
             'open_tasks_len': len(open_tasks),
             'open_fetch_duration': open_fetch_duration,
@@ -59,10 +60,11 @@ class MainPage(webapp2.RequestHandler):
 
             'next_url': cursor_next and cursor_next.urlsafe(),
             'next_url_visibility': ('visible' if has_more_next else 'hidden'),
-            'prev_url': cursor and cursor_prev and cursor_prev.urlsafe(),
+            'prev_url': cursor_prev and cursor_prev.urlsafe(),
             'prev_url_visibility': (
                 'visible' if cursor and has_more_prev else 'hidden'),
         }))
+        self.response.out.write('<div>%s</div>' % cursor)
 
 
 app = webapp2.WSGIApplication([
