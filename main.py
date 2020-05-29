@@ -28,8 +28,8 @@ import task_entry
 
 class MainPage(webapp2.RequestHandler):
     def get(self):
-        raw_cursor = urlsafe=self.request.get('cursor')
-        cursor = Cursor(raw_cursor) if raw_cursor else None
+        raw_cursor = self.request.get('cursor')
+        cursor = Cursor(urlsafe=raw_cursor) if raw_cursor else None
 
         start = time.time()
         open_tasks = (
@@ -59,7 +59,7 @@ class MainPage(webapp2.RequestHandler):
 
             'next_url': cursor_next and cursor_next.urlsafe(),
             'next_url_visibility': ('visible' if has_more_next else 'hidden'),
-            'prev_url': cursor_prev and cursor_prev.urlsafe(),
+            'prev_url': cursor and cursor_prev and cursor_prev.urlsafe(),
             'prev_url_visibility': ('visible' if has_more_prev else 'hidden'),
         }))
 
