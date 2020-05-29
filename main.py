@@ -17,9 +17,12 @@ sys.path.append('../oppia_tools/google_appengine_1.9.67/google_appengine')
 sys.path.append('../oppia_tools/google-cloud-sdk-251.0.0')
 
 import os
+import random
 import time
+import uuid
 
 from google.appengine.datastore.datastore_query import Cursor
+from google.appengine.ext import ndb
 from google.appengine.ext.webapp import template
 import webapp2
 
@@ -64,19 +67,6 @@ class MainPage(webapp2.RequestHandler):
         self.response.out.write(template.render(path, template_values))
 
 
-class NewPage(webapp2.RequestHandler):
-    def get(self):
-        self.response.content_type = 'text/plain'
-        num = self.request.get('num')
-        taskid = self.request.get('taskid') or 'foo'
-        if num:
-            task_entry.TaskEntryModel.put_multi(
-                [task_entry.get_random_task(entity_id=taskid) for _ in range(int(num))])
-            print('%s writes' % num)
-            self.response.out.write('%s written' % num)
-
-
 app = webapp2.WSGIApplication([
     ('/', MainPage),
-    ('/new', NewPage),
 ])
