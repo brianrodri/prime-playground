@@ -283,12 +283,19 @@ class TaskEntryModel(ndb.Model):
         raise Exception('New id generator is producing too many collisions.')
 
     @classmethod
-    def fetch_open_tasks(cls, entity_type, entity_id, cursor, reverse=False):
+    def fetch_all_tasks(cls, entity_type, entity_id, status, reverse=False):
+        return cls.query(
+            cls.entity_type == entity_type,
+            cls.entity_id == entity_id,
+            cls.status == status)
+
+    @classmethod
+    def fetch_tasks(cls, entity_type, entity_id, status, cursor, reverse=False):
         return (
             cls.query(
                 cls.entity_type == entity_type,
                 cls.entity_id == entity_id,
-                cls.status == STATUS_OPEN)
+                cls.status == status)
             .order(cls.last_updated if reverse else -cls.last_updated)
             .fetch_page(10, start_cursor=cursor))
 

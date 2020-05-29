@@ -31,24 +31,44 @@ class MainPage(webapp2.RequestHandler):
         cursor = Cursor(urlsafe=self.request.get('cursor'))
 
         lo = time.time()
-        tasks, next_cursor, more = task_entry.TaskEntryModel.fetch_open_tasks(
-            'exploration', 'foo', cursor, reverse=False)
-        _, prev_cursor, prev = task_entry.TaskEntryModel.fetch_open_tasks(
-            'exploration', 'foo', cursor, reverse=True)
+        resolved_tasks, next_cursor, more = task_entry.TaskEntryModel.fetch_tasks(
+            'exploration', 'foo', 'resolved', cursor, reverse=False)
+        _, prev_cursor, prev = task_entry.TaskEntryModel.fetch_tasks(
+            'exploration', 'foo', 'resolved', cursor, reverse=True)
+        resolved_tasks = list(resolved_tasks)
         hi = time.time()
+        resolved_fetch_duration = hi - lo
 
-        template_values = { 'tasks': tasks }
+        lo = time.time()
+        open_tasks = task_entry.TaskEntryModel.fetch_all_tasks(
+            'exploration', 'foo', 'open', reverse=False)
+        hi = time.time()
+        open_tasks = list(open_tasks)
+        open_fetch_duration = hi - lo
 
+        lo = time.time()
+        count = task_entry.TaskEntryModel.query().count()
+        hi = time.time()
+        count_duration = hi - lo
+
+        template_values = {
+            'count': count,
+            'count_duration': count_duration,
+            'open_tasks': open_tasks,
+            'open_fetch_duration': open_fetch_duration,
+            'open_tasks_len': len(open_tasks),
+            'resolved_tasks': resolved_tasks,
+            'resolved_fetch_duration': resolved_fetch_duration,
+            'resolved_tasks_len': len(resolved_tasks),
+            'next_url': next_cursor and next_cursor.urlsafe(),
+            'next_url_style': 'visibility: %s' % (
+              'visible' if more and next_cursor else 'hidden'),
+            'prev_url': prev_cursor and prev_cursor.urlsafe(),
+            'prev_url_style': 'visibility: %s' % (
+              'visible' if prev and prev_cursor else 'hidden'),
+        }
         path = os.path.join(os.path.dirname(__file__), 'index.html')
         self.response.out.write(template.render(path, template_values))
-        self.response.out.write('<div>Done in %s msec</div>' % str(hi - lo))
-
-        if prev and prev_cursor:
-            self.response.out.write('<a href="/?cursor=%s">&lt;- Prev</a>' %
-                                    prev_cursor.urlsafe())
-        if more and next_cursor:
-            self.response.out.write('<a href="/?cursor=%s">Next -&gt;</a>' %
-                                    next_cursor.urlsafe())
 
 
 app = webapp2.WSGIApplication([
