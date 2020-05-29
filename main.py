@@ -36,8 +36,8 @@ class MainPage(webapp2.RequestHandler):
         lo = time.time()
         open_tasks = task_entry.TaskEntryModel.fetch_all_tasks(
             'exploration', 'foo', 'open', reverse=False)
-        hi = time.time()
         open_tasks = list(open_tasks)
+        hi = time.time()
         open_fetch_duration = hi - lo
 
         lo = time.time()
