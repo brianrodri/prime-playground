@@ -4,7 +4,7 @@
     <em>{{ resolved_tasks_len }} resolved tasks (fetched in {{resolved_fetch_duration}})</em>
     <ul>
       {% for task in resolved_tasks %}
-      <li>{{ task.id }}</li>
+      <li>{{ task.id }}: {{ task.status }}</li>
       {% endfor %}
     </ul>
     <a href="/?cursor={{prev_url}}" style="visibility: {{prev_url_visibility}}">Prev</a>
