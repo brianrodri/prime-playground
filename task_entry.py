@@ -339,7 +339,3 @@ def get_random_task(entity_id=None):
         target_id=target_id,
         status=status,
         issue_description=issue_description)
-
-
-if __name__ == '__main__':
-    main()

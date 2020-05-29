@@ -60,7 +60,7 @@ class MainPage(webapp2.RequestHandler):
             'resolved_tasks': resolved_tasks,
             'resolved_fetch_duration': resolved_fetch_duration,
             'resolved_tasks_len': len(resolved_tasks),
-            'next_url': next_cursor and next_cursor.urlsafe(),
+            'next_url': more and next_cursor.urlsafe(),
             'next_url_style': 'visibility: %s' % (
               'visible' if more and next_cursor else 'hidden'),
             'prev_url': prev_cursor and prev_cursor.urlsafe(),
@@ -71,6 +71,19 @@ class MainPage(webapp2.RequestHandler):
         self.response.out.write(template.render(path, template_values))
 
 
+class NewPage(webapp2.RequestHandler):
+    def get(self):
+        self.response.content_type = 'text/plain'
+        num = self.request.get('num')
+        taskid = self.request.get('taskid') or 'foo'
+        if num:
+            task_entry.TaskEntryModel.put_multi(
+                [task_entry.get_random_task(entity_id=taskid) for _ in range(int(num))])
+            print('%s writes' % num)
+            self.response.out.write('%s written' % num)
+
+
 app = webapp2.WSGIApplication([
     ('/', MainPage),
+    ('/new', NewPage),
 ])
