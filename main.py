@@ -28,7 +28,8 @@ import task_entry
 
 class MainPage(webapp2.RequestHandler):
     def get(self):
-        cursor = Cursor(urlsafe=self.request.get('cursor'))
+        raw_cursor = urlsafe=self.request.get('cursor')
+        cursor = Cursor(raw_cursor) if raw_cursor else None
 
         start = time.time()
         open_tasks = (
