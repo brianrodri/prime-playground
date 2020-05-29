@@ -64,7 +64,6 @@ class MainPage(webapp2.RequestHandler):
             'prev_url_visibility': (
                 'visible' if cursor and has_more_prev else 'hidden'),
         }))
-        self.response.out.write('<div>%s</div>' % cursor)
 
 
 app = webapp2.WSGIApplication([
