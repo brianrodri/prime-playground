@@ -44,28 +44,13 @@ class MainPage(webapp2.RequestHandler):
         self.response.out.write('<div>Done in %s msec</div>' % str(hi - lo))
 
         if prev and prev_cursor:
-            self.response.out.write('<a href="/?cursor=%s">More...</a>' %
+            self.response.out.write('<a href="/?cursor=%s">&lt;- Prev</a>' %
                                     prev_cursor.urlsafe())
         if more and next_cursor:
-            self.response.out.write('<a href="/?cursor=%s">More...</a>' %
+            self.response.out.write('<a href="/?cursor=%s">Next -&gt;</a>' %
                                     next_cursor.urlsafe())
-
-
-class TaskController(webapp2.RequestHandler):
-  def get(self):
-    # We set the same parent key on the 'Greeting' to ensure each greeting is in
-    # the same entity group. Queries across the single entity group will be
-    # consistent. However, the write rate to a single entity group should
-    # be limited to ~1/second.
-    entity_id = self.request.get('id')
-    num_to_make = int(self.request.get('num')) or 1
-    for _ in range(num_to_make):
-        task = task_entry.get_random_task(entity_id)
-        task.put()
-    self.redirect('/')
 
 
 app = webapp2.WSGIApplication([
     ('/', MainPage),
-    ('/new', TaskController),
-], debug=True)
+])
