@@ -7,15 +7,15 @@
       <li>{{ task.id }}</li>
       {% endfor %}
     </ul>
-    <a href="/?cursor={{prev_url}}" style="{{prev_url_style}}">Prev</a>
-    <a href="/?cursor={{next_url}}" style="{{next_url_style}}">Next</a>
+    <a href="/?cursor={{prev_url}}" style="visibility: {{prev_url_visibility}}">Prev</a>
+    <a href="/?cursor={{next_url}}" style="visibility: {{next_url_visibility}}">Next</a>
     <hr/>
 
     <h1>Open Tasks</h1>
     <em>{{ open_tasks_len }} open tasks (fetched in {{open_fetch_duration}})</em>
     <ul>
       {% for task in open_tasks %}
-      <li>{{ task.id }}</li>
+      <li>{{ task.id }}: {{ task.status }}</li>
       {% endfor %}
     </ul>
     <hr/>

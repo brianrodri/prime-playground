@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import contextlib
 import sys
 sys.path.append('../oppia_tools/google_appengine_1.9.67/google_appengine')
 sys.path.append('../oppia_tools/google-cloud-sdk-251.0.0')
@@ -33,38 +34,37 @@ class MainPage(webapp2.RequestHandler):
     def get(self):
         cursor = Cursor(urlsafe=self.request.get('cursor'))
 
-        lo = time.time()
-        open_tasks = task_entry.TaskEntryModel.fetch_all_tasks(
-            'exploration', 'foo', 'open', reverse=False)
-        open_tasks = list(open_tasks)
-        hi = time.time()
-        open_fetch_duration = hi - lo
+        start = time.time()
+        open_tasks = (
+            task_entry.TaskEntryModel.fetch_open_tasks('exploration', 'foo'))
+        end = time.time()
+        open_fetch_duration = end - start
 
-        lo = time.time()
-        resolved_tasks, next_cursor, more = task_entry.TaskEntryModel.fetch_tasks(
-            'exploration', 'foo', 'resolved', cursor, reverse=False)
-        _, prev_cursor, prev = task_entry.TaskEntryModel.fetch_tasks(
-            'exploration', 'foo', 'resolved', cursor, reverse=True)
-        resolved_tasks = list(resolved_tasks)
-        hi = time.time()
-        resolved_fetch_duration = hi - lo
+        start = time.time()
+        resolved_tasks, cursor_next, has_more_next = (
+            task_entry.TaskEntryModel.get_history_page(
+                'exploration', 'foo', 'resolved', cursor, new_to_old=True))
+        _, cursor_prev, has_more_prev = (
+            task_entry.TaskEntryModel.get_history_page(
+                'exploration', 'foo', 'resolved', cursor, new_to_old=False))
+        end = time.time()
+        resolved_fetch_duration = end - start
 
-        template_values = {
-            'open_tasks': open_tasks,
-            'open_fetch_duration': open_fetch_duration,
-            'open_tasks_len': len(open_tasks),
-            'resolved_tasks': resolved_tasks,
-            'resolved_fetch_duration': resolved_fetch_duration,
-            'resolved_tasks_len': len(resolved_tasks),
-            'next_url': more and next_cursor.urlsafe(),
-            'next_url_style': 'visibility: %s' % (
-              'visible' if more and next_cursor else 'hidden'),
-            'prev_url': prev and prev_cursor.urlsafe(),
-            'prev_url_style': 'visibility: %s' % (
-              'visible' if prev and prev_cursor else 'hidden'),
-        }
         path = os.path.join(os.path.dirname(__file__), 'index.html')
-        self.response.out.write(template.render(path, template_values))
+        self.response.out.write(template.render(path, {
+            'open_tasks': open_tasks,
+            'open_tasks_len': len(open_tasks),
+            'open_fetch_duration': open_fetch_duration,
+
+            'resolved_tasks': resolved_tasks,
+            'resolved_tasks_len': len(resolved_tasks),
+            'resolved_fetch_duration': resolved_fetch_duration,
+
+            'next_url': cursor_next and cursor_next.urlsafe(),
+            'next_url_visibility': ('visible' if has_more_next else 'hidden'),
+            'prev_url': cursor_prev and cursor_prev.urlsafe(),
+            'prev_url_visibility': ('visible' if has_more_prev else 'hidden'),
+        }))
 
 
 app = webapp2.WSGIApplication([
