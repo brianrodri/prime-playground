@@ -60,7 +60,8 @@ class MainPage(webapp2.RequestHandler):
             'next_url': cursor_next and cursor_next.urlsafe(),
             'next_url_visibility': ('visible' if has_more_next else 'hidden'),
             'prev_url': cursor and cursor_prev and cursor_prev.urlsafe(),
-            'prev_url_visibility': ('visible' if has_more_prev else 'hidden'),
+            'prev_url_visibility': (
+                'visible' if cursor and has_more_prev else 'hidden'),
         }))
 
 
