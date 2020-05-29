@@ -31,6 +31,13 @@ class MainPage(webapp2.RequestHandler):
         cursor = Cursor(urlsafe=self.request.get('cursor'))
 
         lo = time.time()
+        open_tasks = task_entry.TaskEntryModel.fetch_all_tasks(
+            'exploration', 'foo', 'open', reverse=False)
+        hi = time.time()
+        open_tasks = list(open_tasks)
+        open_fetch_duration = hi - lo
+
+        lo = time.time()
         resolved_tasks, next_cursor, more = task_entry.TaskEntryModel.fetch_tasks(
             'exploration', 'foo', 'resolved', cursor, reverse=False)
         _, prev_cursor, prev = task_entry.TaskEntryModel.fetch_tasks(
@@ -39,21 +46,7 @@ class MainPage(webapp2.RequestHandler):
         hi = time.time()
         resolved_fetch_duration = hi - lo
 
-        lo = time.time()
-        open_tasks = task_entry.TaskEntryModel.fetch_all_tasks(
-            'exploration', 'foo', 'open', reverse=False)
-        hi = time.time()
-        open_tasks = list(open_tasks)
-        open_fetch_duration = hi - lo
-
-        lo = time.time()
-        count = task_entry.TaskEntryModel.query().count()
-        hi = time.time()
-        count_duration = hi - lo
-
         template_values = {
-            'count': count,
-            'count_duration': count_duration,
             'open_tasks': open_tasks,
             'open_fetch_duration': open_fetch_duration,
             'open_tasks_len': len(open_tasks),
@@ -63,7 +56,7 @@ class MainPage(webapp2.RequestHandler):
             'next_url': more and next_cursor.urlsafe(),
             'next_url_style': 'visibility: %s' % (
               'visible' if more and next_cursor else 'hidden'),
-            'prev_url': prev_cursor and prev_cursor.urlsafe(),
+            'prev_url': prev and prev_cursor.urlsafe(),
             'prev_url_style': 'visibility: %s' % (
               'visible' if prev and prev_cursor else 'hidden'),
         }
