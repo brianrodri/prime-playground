@@ -32,16 +32,16 @@ class MainPage(webapp2.RequestHandler):
 
         start = time.time()
         open_tasks = (
-            task_entry.TaskEntryModel.fetch_open_tasks('exploration', 'foo'))
+            task_entry.TaskEntryModel.get_open_tasks('exploration', 'foo'))
         end = time.time()
         open_fetch_duration = end - start
 
         start = time.time()
         resolved_tasks, cursor_next, has_more_next = (
-            task_entry.TaskEntryModel.get_history_page(
+            task_entry.TaskEntryModel.fetch_history_page(
                 'exploration', 'foo', 'resolved', cursor, new_to_old=True))
         _, cursor_prev, has_more_prev = (
-            task_entry.TaskEntryModel.get_history_page(
+            task_entry.TaskEntryModel.fetch_history_page(
                 'exploration', 'foo', 'resolved', cursor, new_to_old=False))
         end = time.time()
         resolved_fetch_duration = end - start
