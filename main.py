@@ -12,18 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import contextlib
 import sys
 sys.path.append('../oppia_tools/google_appengine_1.9.67/google_appengine')
 sys.path.append('../oppia_tools/google-cloud-sdk-251.0.0')
 
 import os
-import random
 import time
-import uuid
 
 from google.appengine.datastore.datastore_query import Cursor
-from google.appengine.ext import ndb
 from google.appengine.ext.webapp import template
 import webapp2
 

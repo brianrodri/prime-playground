@@ -20,9 +20,6 @@ from __future__ import absolute_import
 from __future__ import unicode_literals
 
 import datetime
-import sys
-sys.path.append('google-cloud-sdk')
-sys.path.append('google_appengine')
 
 import random
 import uuid
