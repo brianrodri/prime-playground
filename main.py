@@ -17,6 +17,7 @@ sys.path.append('../oppia_tools/google_appengine_1.9.67/google_appengine')
 sys.path.append('../oppia_tools/google-cloud-sdk-251.0.0')
 
 import os
+import re
 import time
 
 from google.appengine.datastore.datastore_query import Cursor
@@ -24,25 +25,27 @@ from google.appengine.ext.webapp import template
 import webapp2
 
 import task_entry
+import task_entry_with_computed_property
+import task_entry_with_real_property
 
 
-class MainPage(webapp2.RequestHandler):
+class PageBase(webapp2.RequestHandler):
     def get(self):
         urlsafe_cursor = self.request.get('cursor') or None
         cursor = urlsafe_cursor and Cursor(urlsafe=urlsafe_cursor)
 
         start = time.time()
         open_tasks = (
-            task_entry.TaskEntryModel.get_open_tasks('exploration', 'foo'))
+            self.TASK_MODEL.get_open_tasks('exploration', 'foo'))
         end = time.time()
         open_fetch_duration = end - start
 
         start = time.time()
         resolved_tasks, cursor_next, has_more_next = (
-            task_entry.TaskEntryModel.fetch_history_page(
+            self.TASK_MODEL.fetch_history_page(
                 'exploration', 'foo', 'resolved', cursor, new_to_old=True))
         _, cursor_prev, has_more_prev = (
-            task_entry.TaskEntryModel.fetch_history_page(
+            self.TASK_MODEL.fetch_history_page(
                 'exploration', 'foo', 'resolved', cursor, new_to_old=False))
         resolved_tasks = list(resolved_tasks)
         end = time.time()
@@ -66,6 +69,55 @@ class MainPage(webapp2.RequestHandler):
         }))
 
 
+class GeneratePageBase(webapp2.RequestHandler):
+    BATCH_SIZE = 1000
+    def get(self):
+        self.response.content_type = 'text/plain'
+        num = self.request.get('num')
+        task_id = self.request.get('task_id') or None
+
+        num_remaining = int(num or 0)
+        num_todo = min(num_remaining, self.BATCH_SIZE * 4)
+        while num_todo:
+            batch_size = min(num_todo, self.BATCH_SIZE)
+            self.TASK_MODEL.put_multi(
+                [self.TASK_MODEL.get_random_task(task_id) for _ in range(batch_size)])
+            self.response.out.write('%d entities written\n' % batch_size)
+            num_todo -= batch_size
+            num_remaining -= batch_size
+
+        if num_remaining:
+            next_run_path = (
+                re.sub('num\=\d+', 'num=%d' % num_remaining, self.request.path_qs))
+            self.redirect(next_run_path)
+        else:
+            self.response.out.write('done')
+
+
+class TaskPage(PageBase):
+    TASK_MODEL = task_entry.TaskEntryModel
+class GenerateTaskPage(GeneratePageBase):
+    TASK_MODEL = task_entry.TaskEntryModel
+
+
+class TaskWithComputedPropertyPage(PageBase):
+    TASK_MODEL = task_entry_with_computed_property.TaskEntryWithComputedPropertyModel
+class GenerateTaskWithComputedPropertyPage(GeneratePageBase):
+    TASK_MODEL = task_entry_with_computed_property.TaskEntryWithComputedPropertyModel
+
+
+class TaskWithRealPropertyPage(PageBase):
+    TASK_MODEL = task_entry_with_real_property.TaskEntryWithRealPropertyModel
+class GenerateTaskWithRealPropertyPage(GeneratePageBase):
+    TASK_MODEL = task_entry_with_real_property.TaskEntryWithRealPropertyModel
+
+
 app = webapp2.WSGIApplication([
-    ('/', MainPage),
+    ('/', TaskPage),
+    ('/base', TaskPage),
+    ('/base/new', GenerateTaskPage),
+    ('/real', TaskWithRealPropertyPage),
+    ('/real/new', GenerateTaskWithRealPropertyPage),
+    ('/comp', TaskWithComputedPropertyPage),
+    ('/comp/new', GenerateTaskWithComputedPropertyPage),
 ])

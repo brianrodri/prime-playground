@@ -24,3 +24,33 @@ indexes:
   - name: status
   - name: last_updated
     direction: desc
+
+- kind: TaskEntryWithComputedPropertyModel
+  properties:
+  - name: entity_id
+  - name: entity_type
+  - name: status
+  - name: last_updated
+
+- kind: TaskEntryWithComputedPropertyModel
+  properties:
+  - name: entity_id
+  - name: entity_type
+  - name: status
+  - name: last_updated
+    direction: desc
+
+- kind: TaskEntryWithRealPropertyModel
+  properties:
+  - name: entity_id
+  - name: entity_type
+  - name: status
+  - name: last_updated
+
+- kind: TaskEntryWithRealPropertyModel
+  properties:
+  - name: entity_id
+  - name: entity_type
+  - name: status
+  - name: last_updated
+    direction: desc

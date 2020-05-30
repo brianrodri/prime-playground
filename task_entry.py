@@ -315,25 +315,25 @@ class TaskEntryModel(ndb.Model):
             entity_type, entity_id, entity_version, task_type,
             target_type, target_id))
 
-
-def get_random_task(entity_id=None):
-    entity_type = 'exploration'
-    entity_id = entity_id or uuid.uuid4().hex
-    entity_version = 1
-    task_type = random.choice(TASK_TYPES)
-    target_type = random.choice(TARGET_TYPES)
-    target_id = uuid.uuid4().hex
-    status = random.choice(STATUS_CHOICES)
-    issue_description = uuid.uuid4().hex
-    return TaskEntryModel(
-        id=TaskEntryModel.get_task_id(
-            entity_type, entity_id, entity_version, task_type,
-            target_type, target_id),
-        entity_type=entity_type,
-        entity_id=entity_id,
-        entity_version=entity_version,
-        task_type=task_type,
-        target_type=target_type,
-        target_id=target_id,
-        status=status,
-        issue_description=issue_description)
+    @classmethod
+    def get_random_task(cls, entity_id=None):
+        entity_type = 'exploration'
+        entity_id = entity_id or uuid.uuid4().hex
+        entity_version = 1
+        task_type = random.choice(TASK_TYPES)
+        target_type = random.choice(TARGET_TYPES)
+        target_id = uuid.uuid4().hex
+        status = random.choice(STATUS_CHOICES)
+        issue_description = uuid.uuid4().hex
+        return cls(
+            id=cls.get_task_id(
+                entity_type, entity_id, entity_version, task_type,
+                target_type, target_id),
+            entity_type=entity_type,
+            entity_id=entity_id,
+            entity_version=entity_version,
+            task_type=task_type,
+            target_type=target_type,
+            target_id=target_id,
+            status=status,
+            issue_description=issue_description)
