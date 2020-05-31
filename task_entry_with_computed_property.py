@@ -80,8 +80,8 @@ class TaskEntryWithComputedPropertyModel(ndb.Model):
     deleted = ndb.BooleanProperty(indexed=True, default=False)
 
     entity_key = ndb.ComputedProperty(
-        lambda self: '.'.join(
-            str(v) for v in [self.entity_type, self.entity_id, self.entity_version]))
+        lambda self: self.get_entity_key(
+            self.entity_type, self.entity_id, self.entity_version))
 
     # The type of entity a task entry refers to.
     entity_type = ndb.StringProperty(
@@ -119,6 +119,11 @@ class TaskEntryWithComputedPropertyModel(ndb.Model):
     def id(self):
         """A unique id for this model instance."""
         return self.key.id()
+
+    @classmethod
+    def get_entity_key(cls, entity_type, entity_id, entity_version):
+        return '.'.join(
+            str(v) for v in [entity_type, entity_id, entity_version])
 
     @classmethod
     def get(cls, entity_id, strict=True):
@@ -284,20 +289,19 @@ class TaskEntryWithComputedPropertyModel(ndb.Model):
         raise Exception('New id generator is producing too many collisions.')
 
     @classmethod
-    def get_open_tasks(cls, entity_type, entity_id):
-        return list(cls.query(
-            cls.entity_type == entity_type,
-            cls.entity_id == entity_id,
-            cls.status == STATUS_OPEN))
+    def get_open_tasks(cls, entity_type, entity_id, entity_version):
+        entity_key = cls.get_entity_key(entity_type, entity_id, entity_version)
+        return list(
+            cls.query(cls.entity_key == entity_key, cls.status == STATUS_OPEN))
 
     @classmethod
     def fetch_history_page(
-            cls, entity_type, entity_id, status, cursor, new_to_old=False):
+            cls, entity_type, entity_id, entity_version, cursor,
+            new_to_old=False):
+        entity_key = cls.get_entity_key(entity_type, entity_id, entity_version)
         return (
             cls.query(
-                cls.entity_type == entity_type,
-                cls.entity_id == entity_id,
-                cls.status == status)
+                cls.entity_key == entity_key, cls.status == STATUS_RESOLVED)
             .order(-cls.last_updated if new_to_old else cls.last_updated)
             .fetch_page(10, start_cursor=cursor))
 
@@ -318,6 +322,11 @@ class TaskEntryWithComputedPropertyModel(ndb.Model):
         return '.'.join(str(piece) for piece in (
             entity_type, entity_id, entity_version, task_type,
             target_type, target_id))
+
+    @classmethod
+    def get_entity_key(cls, entity_type, entity_id, entity_version):
+        return '.'.join(
+            str(v) for v in [entity_type, entity_id, entity_version])
 
     @classmethod
     def get_random_task(cls, entity_id=None):

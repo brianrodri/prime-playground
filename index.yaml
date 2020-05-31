@@ -14,6 +14,23 @@ indexes:
   properties:
   - name: entity_id
   - name: entity_type
+  - name: entity_version
+  - name: status
+  - name: last_updated
+
+- kind: TaskEntryModel
+  properties:
+  - name: entity_id
+  - name: entity_type
+  - name: entity_version
+  - name: status
+  - name: last_updated
+    direction: desc
+
+- kind: TaskEntryModel
+  properties:
+  - name: entity_id
+  - name: entity_type
   - name: status
   - name: last_updated
 
@@ -40,6 +57,19 @@ indexes:
   - name: last_updated
     direction: desc
 
+- kind: TaskEntryWithComputedPropertyModel
+  properties:
+  - name: entity_key
+  - name: status
+  - name: last_updated
+
+- kind: TaskEntryWithComputedPropertyModel
+  properties:
+  - name: entity_key
+  - name: status
+  - name: last_updated
+    direction: desc
+
 - kind: TaskEntryWithRealPropertyModel
   properties:
   - name: entity_id
@@ -51,6 +81,19 @@ indexes:
   properties:
   - name: entity_id
   - name: entity_type
+  - name: status
+  - name: last_updated
+    direction: desc
+
+- kind: TaskEntryWithRealPropertyModel
+  properties:
+  - name: entity_key
+  - name: status
+  - name: last_updated
+
+- kind: TaskEntryWithRealPropertyModel
+  properties:
+  - name: entity_key
   - name: status
   - name: last_updated
     direction: desc

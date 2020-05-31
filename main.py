@@ -36,17 +36,17 @@ class PageBase(webapp2.RequestHandler):
 
         start = time.time()
         open_tasks = (
-            self.TASK_MODEL.get_open_tasks('exploration', 'foo'))
+            self.TASK_MODEL.get_open_tasks('exploration', 'foo', 1))
         end = time.time()
         open_fetch_duration = end - start
 
         start = time.time()
         resolved_tasks, cursor_next, has_more_next = (
             self.TASK_MODEL.fetch_history_page(
-                'exploration', 'foo', 'resolved', cursor, new_to_old=True))
+                'exploration', 'foo', 1, cursor, new_to_old=True))
         _, cursor_prev, has_more_prev = (
             self.TASK_MODEL.fetch_history_page(
-                'exploration', 'foo', 'resolved', cursor, new_to_old=False))
+                'exploration', 'foo', 1, cursor, new_to_old=False))
         resolved_tasks = list(resolved_tasks)
         end = time.time()
         resolved_fetch_duration = end - start
